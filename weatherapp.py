@@ -1,9 +1,13 @@
 import tkinter as tk
 from tkinter import messagebox
 import requests
+from dotenv import load_dotenv
+import os
+
+load_dotenv() 
 
 # OpenWeatherMap API Key (Replace with your own key)
-API_KEY = "40f74da9800890ca9d6a7dbe718c652d"
+API_KEY =  os.getenv("OPENWEATHER_API_KEY")
 BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 
 # Function to Get Weather Data
