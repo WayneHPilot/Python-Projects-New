@@ -1,39 +1,57 @@
-# Hardcoded weather data for several cities
-weather_data = {
-    "London": {"temperature": "15°C", "conditions": "Cloudy", "wind_speed": "5 km/h", "humidity": "80%"},
-    "New York": {"temperature": "20°C", "conditions": "Sunny", "wind_speed": "10 km/h", "humidity": "50%"},
-    "Tokyo": {"temperature": "18°C", "conditions": "Rainy", "wind_speed": "7 km/h", "humidity": "90%"},
-    "Sydney": {"temperature": "22°C", "conditions": "Windy", "wind_speed": "15 km/h", "humidity": "60%"},
-    "Paris": {"temperature": "17°C", "conditions": "Foggy", "wind_speed": "3 km/h", "humidity": "85%"}
-}
+import tkinter as tk
+from tkinter import messagebox
+import requests
 
-# Function to display weather information for a city
-def display_weather(city, data):
-    print(f"\nWeather forecast for {city}: ")
-    print(f"Temperature: {data['temperature']}")
-    print(f"Conditions: {data['conditions']}")
-    print(f"Wind Speed: {data['wind_speed']}")
-    print(f"Humidity: {data['humidity']}\n")
+# OpenWeatherMap API Key (Replace with your own key)
+API_KEY = "40f74da9800890ca9d6a7dbe718c652d"
+BASE_URL = "http://api.openweathermap.org/data/2.5/weather"
 
-# Function to handle user input and fetch the weather data
-def get_weather_forecast():
-    print("Welcome to the Weather Forecast Application!\n")
+# Function to Get Weather Data
+def get_weather():
+    city = city_entry.get()
+    if not city:
+        messagebox.showwarning("Input Error", "Please enter a city name.")
+        return
+    
+    params = {"q": city, "appid": API_KEY, "units": "metric"}
+    response = requests.get(BASE_URL, params=params)
+    
+    if response.status_code == 200:
+        data = response.json()
+        weather = data["weather"][0]["description"].capitalize()
+        temp = data["main"]["temp"]
+        humidity = data["main"]["humidity"]
+        wind_speed = data["wind"]["speed"]
 
-    while True:
-        city = input("Enter the name of the city you want the weather forecast for: ").strip()
+        weather_info = (
+            f"🌡 Temperature: {temp}°C\n"
+            f"☁ Condition: {weather}\n"
+            f"💧 Humidity: {humidity}%\n"
+            f"🌬 Wind Speed: {wind_speed} m/s"
+        )
+        weather_label.config(text=weather_info)
+    else:
+        messagebox.showerror("Error", "City not found. Please try again.")
 
-        if city in weather_data:
-            display_weather(city, weather_data[city])
-            break
-        else:
-            print("⚠️ Invalid city name. Please enter a valid city from the list.\n")
-            print("Valid cities are:", ", ".join(weather_data.keys()))
+# Create Tkinter Window
+root = tk.Tk()
+root.title("🌦 Live Weather App")
+root.geometry("350x300")
 
-    print("Thank you for using the weather forecast application!")
+# City Entry
+city_label = tk.Label(root, text="Enter City:", font=("Arial", 12))
+city_label.pack(pady=5)
 
-# Main function to run the program
-def main():
-    get_weather_forecast()
+city_entry = tk.Entry(root, font=("Arial", 12))
+city_entry.pack(pady=5)
 
-if __name__ == "__main__":
-    main()
+# Get Weather Button
+btn_get_weather = tk.Button(root, text="Get Weather", command=get_weather, font=("Arial", 12))
+btn_get_weather.pack(pady=10)
+
+# Weather Info Label
+weather_label = tk.Label(root, text="", font=("Arial", 12), justify="left")
+weather_label.pack(pady=10)
+
+# Start Tkinter Main Loop
+root.mainloop()
