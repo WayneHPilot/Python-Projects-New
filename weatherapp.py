@@ -7,6 +7,7 @@ import matplotlib.pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 import threading
 from datetime import datetime
+import sys
 
 load_dotenv()
 
@@ -16,6 +17,10 @@ BASE_URL = "https://weather.visualcrossing.com/VisualCrossingWebServices/rest/se
 
 # Global variable to keep track of the canvas widget
 canvas = None
+
+# Function to convert Fahrenheit to Celsius
+def fahrenheit_to_celsius(f_temp):
+    return round((f_temp - 32) * 5/9, 2)
 
 # Update the get_weather function to fetch forecast data in a separate thread
 def get_weather():
@@ -53,23 +58,23 @@ def fetch_data(city):
                     time = datetime.strptime(raw_time, "%H:%M:%S").strftime("%H:%M")
                 
                 times.append(time)  # Append formatted time
-                temps.append(entry["temp"])  # Append temperature
+                temps.append(fahrenheit_to_celsius(entry["temp"]))  # Convert temperature
 
             # Schedule the plot update to run in the main thread
             root.after(0, plot_temperature, times, temps)
             
             # Show the current weather info as well
             current_weather = data["currentConditions"]
-            temp = current_weather["temp"]
+            temp = fahrenheit_to_celsius(current_weather["temp"])
             weather = current_weather["conditions"]
             humidity = current_weather["humidity"]
             wind_speed = current_weather["windspeed"]
             
             weather_info = (
-                f"🌡 Temperature: {temp}°C\n"
-                f"☁ Condition: {weather}\n"
-                f"💧 Humidity: {humidity}%\n"
-                f"🌬 Wind Speed: {wind_speed} km/h"
+                f"\U0001F321 Temperature: {temp}°C\n"
+                f"\u2601 Condition: {weather}\n"
+                f"\U0001F4A7 Humidity: {humidity}%\n"
+                f"\U0001F32C Wind Speed: {wind_speed} km/h"
             )
             weather_label.config(text=weather_info)
 
@@ -114,7 +119,7 @@ def plot_temperature(times, temps):
 
 # Create Tkinter Window
 root = tk.Tk()
-root.title("🌦 Live Weather App")
+root.title("\U0001F326 Live Weather App")
 root.geometry("700x700")  # Increase window size for better view
 
 # City Entry
@@ -132,15 +137,14 @@ btn_get_weather.pack(pady=10)
 weather_label = tk.Label(root, text="", font=("Arial", 12), justify="left")
 weather_label.pack(pady=10)
 
-# Function to properly exit the application
+# Function to properly close the application
 def on_close():
-    global canvas
-    if canvas:
-        plt.close('all')  # Close Matplotlib figures
-    root.quit()  # Stop the Tkinter main loop
+    global root
+    root.quit()  # Stop the main Tkinter loop
     root.destroy()  # Destroy the window
+    sys.exit(0)  # Force exit the script
 
-# Bind the close event to the function
+# Bind the close function to the window close event
 root.protocol("WM_DELETE_WINDOW", on_close)
 
 # Start Tkinter Main Loop
