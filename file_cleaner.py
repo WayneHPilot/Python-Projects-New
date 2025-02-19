@@ -6,6 +6,7 @@ import shutil
 import zipfile
 from tkinter import ttk
 
+
 # Create and return the main window with specified title and dimensions
 def create_window():
     window = tk.Tk()
